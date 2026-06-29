@@ -26,3 +26,20 @@ CREATE TABLE posts (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE comments (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+
+    post_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+
+    body TEXT NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_comments_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
