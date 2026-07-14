@@ -99,5 +99,14 @@ CREATE TABLE classes (
     name VARCHAR(100) NOT NULL,
     academic_year VARCHAR(20) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    
+    CONSTRAINT fk_classes_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+);
+
+CREATE TABLE student_classes (
+    student_id UUID NOT NULL,
+    class_id UUID NOT NULL,
+    enrolled_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (student_id, class_id),
+    CONSTRAINT fk_student_classes_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    CONSTRAINT fk_student_classes_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
 );
