@@ -110,3 +110,45 @@ CREATE TABLE student_classes (
     CONSTRAINT fk_student_classes_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     CONSTRAINT fk_student_classes_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
 );
+
+
+-- design task management schema
+CREATE TYPE task_status_enum AS ENUM (
+    'TODO',
+    'IN_PROGRESS',
+    'DONE',
+    'CANCELLED'
+);
+
+CREATE TABLE tasks (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    created_by UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status task_status_enum NOT NULL DEFAULT 'TODO',
+    due_date DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+CREATE TABLE task_assignees (
+    task_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (task_id, user_id),
+    CONSTRAINT fk_task_assignees_task FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+    CONSTRAINT fk_task_assignees_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE task_comments (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    task_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_task_comments_task FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+    CONSTRAINT fk_task_comments_user FOREIGN KEY (user_id) REFERENCES users(id);
+)
+
