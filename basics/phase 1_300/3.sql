@@ -63,5 +63,42 @@ CREATE INDEX idx_comments_post_id ON comments(post_id);
 CREATE INDEX idx_comments_user_id ON comments(user);
 
 CREATE TABLE students(
-    
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    student_code VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 )
+
+CREATE TABLE teachers(
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    student_code VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE classes(
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    teacher_pkid INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    academic_year VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_classes_teacher FOREIGN KEY (teacher_pkid) REFERENCES teachers(pkid) ON DELETE CASCADE
+);
+
+CREATE TABLE student_classes(
+    student_pkid INTEGER NOT NULL,
+    class_pkid INTEGER NOT NULL,
+    enrolled_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (student_pkid, class_pkid),
+    CONSTRAINT fk_student_classes_class FOREIGN KEY (class_pkid) REFERENCES classes(pkid) ON DELETE CASCADE,
+    CONSTRAINT fk_student_classes_student FOREIGN KEY (student_pkid) REFERENCES students(pkid) ON DELETE CASCADE
+);
+
