@@ -14,3 +14,24 @@ INSERT INTO users (id, name, email, status, created_at, updated_at) VALUES
 (gen_random_uuid(), 'Alice', 'alice@example.com', 'ACTIVE', NOW(), NOW()),
 (gen_random_uuid(), 'Bob', 'bob@example.com', 'ACTIVE', NOW(), NOW()),
 (gen_random_uuid(), 'Clara', 'clara@example.com', 'INACTIVE', NOW(), NOW()) RETURNING id, name, email;
+
+INSERT INTO archived_users (id, name, email, archived_at) SELECT id, UPPER(name) AS name, LOWER(email) AS email, NOW FROM users WHERE status = 'INACTIVE' RETURNING id, name, email;
+
+BEGIN;
+UPDATE orders
+SET
+    status = 'CANCELLED',
+    updated_at = NOW()
+WHERE status = 'PENDING'
+    AND created_at < NOW() - INTERVAL '30 days'
+RETURNING id, status, updated_at;
+
+COMMIT;
+
+BEGIN;
+
+SELECT COUNT(*) AS rows_that_will_change FROM users WHERE status = 'INACTIVE' AND updated_at < NOW() - INTERVAL '100 days';
+
+UPDATE users SET status = 'ARCHIVED', updated_at = NOW() WHERE status = 'INACTIVE' AND updated_at < NOW() - INTERVAL '100 days' RETURNING id, email, status;
+
+COMMIT;
