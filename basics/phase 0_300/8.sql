@@ -30,4 +30,12 @@ SELECT id, email, firstName FROM users WHERE firstName LIKE 'A%';
 
 SELECT id, email FROM users WHERE status != 'true';
 
-SELECT id, firstName, last
+SELECT id, firstName, lastName, age FROM users ORDER BY age DESC LIMIT 5;
+
+SELECT address, COUNT(*) AS total_location FROM users GROUP BY address;
+
+SELECT age, COUNT(*) AS total_age FROM users GROUP BY age HAVING COUNT(*) > 25;
+
+SELECT address, COUNT(*) AS total_location FROM users GROUP BY address;
+
+SELECT age, COUNT(*) AS total_age FROM users GROUP BY age HAVING COUNT(*) > 25;
