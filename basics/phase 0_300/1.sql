@@ -64,3 +64,6 @@ SELECT age, COUNT(*) AS total_age
     HAVING COUNT(*) > 25;
 
 -- 9. Find the youngest and oldest user by location
+SELECT address, MIN(age) AS youngest_age, MAX(age) AS oldest_age 
+    FROM users 
+    GROUP BY address;
