@@ -62,3 +62,52 @@ DECLARE
     v_return_penalty NUMERIC(12,2);
     v_final_bonus NUMERIC(12,2);
 BEGIN
+    v_month_start := DATE_TRUNC('month', p_month)::DATE;
+
+    v_month_end := (v_month_start + INTERVAL '1 month - 1 day')::DATE;
+
+    RAISE NOTICE 'Calculating bonuses from % to %',
+        v_month_start,
+        v_month_end;
+
+    FOR employee_record IN
+        SELECT
+            e.id,
+            e.name,
+            e.monthly_salary,
+            e.monthly_target,
+            d.department_multiplier
+        FROM employees e
+        INNER JOIN departments d 
+            ON d.id = e.department_id
+    LOOP
+        SELECT
+            COALESCE(
+                SUM(sale_amount) FILTER (WHERE returned = FALSE),
+                0
+            ),
+            COALESCE(
+                SUM(sale_amount) FILTER (WHERE returned = TRUE),
+                0
+            )
+        INTO
+            v_successful_sales,
+            v_returned_amount
+        FROM sales
+        WHERE employee_id = employee_record.id
+            AND sale_date BETWEEN v_month_start AND v_month_end;
+
+        v_net_sales := v_successful_sales - v_returned_amount;
+
+        IF employee_record.monthly_target <= 0 THEN
+            RAISE WARNING
+                'Employee % has an invalid target. Percentage set to zero.',
+                employee_record.name;
+
+            v_target_percentage := 0;
+        ELSE
+            v_target_percentage := ROUND(
+                (v_net_sales / employee_record.monthly_target) * 100,
+                2
+            );
+        END IF;
