@@ -111,3 +111,26 @@ BEGIN
                 2
             );
         END IF;
+
+        CASE
+            WHEN v_target_percentage >= 150 THEN
+                v_performance_level := 'EXCEPTIONAL';
+                v_bonus_rate := 0.20;
+            
+            WHEN v_target_percentage >= 120 THEN
+                v_performance_level := 'EXCELLENT';
+                v_bonus_rate := 0.15;
+            
+            WHEN v_target_percentage >= 100 THEN
+                v_performance_level := 'GOOD';
+                v_bonus_rate := 0.10;
+            
+            WHEN v_target_percentage >= 80 THEN
+                v_performance_level := 'AVERAGE';
+                v_bonus_rate := 0.3;
+            
+            ELSE
+                v_performance_level := 'POOR';
+                v_bonus_rate := 0;
+        END CASE;
+        
