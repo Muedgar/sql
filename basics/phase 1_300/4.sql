@@ -61,3 +61,23 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_posts_created_at ON posts(created_at);
 CREATE INDEX idx_comments_post_id ON comments(post_id);
 CREATE INDEX idx_comments_user_id ON comments(user);
+
+CREATE TABLE students(
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    student_code VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE teachers(
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    student_code VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
