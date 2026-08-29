@@ -134,3 +134,40 @@ BEGIN
                 v_bonus_rate := 0;
         END CASE;
         
+
+        -- Mathematical operation 3
+        v_base_bonus := employee_record.monthly_salary * v_bonus_rate * employee_record.department_multiplier;
+
+        -- Mathematical operation 4
+        v_return_penalty := v_return_amount * 0.05;
+
+        -- GREATEST prevents a negative bonus.
+        v_final_bonus := GREATEST(ROUND(v_base_bonus - v_return_penalty, 2), 0);
+
+        -- insert the result. If this employee already has a bonus for the month, update the existing record.
+        INSERT INTO employee_bonuses (
+            employee_id,
+            bonus_month,
+            total_sales,
+            returned_amount,
+            target_percentage,
+            performance_level,
+            bonus_amount
+        )
+        VALUES (
+            employee_record.id,
+            v_month_start,
+            v_net_sales,
+            v_returned_amount,
+            v_target_percentage,
+            v_performance_level,
+            v_final_bonus
+        )
+        ON CONFLICT (employee_id, bonus_month)
+        DO UPDATE SET
+            total_sales = EXCLUDED.total_sales,
+            returned_amount = EXCLUDED.returned_amount,
+            target_percentage = EXCLUDED.target_percentage,
+            performance_level = EXCLUDED.performance_level,
+            bonus_amount = EXCLUDED.bonus_amount,
+            calculated_at = CURRENT_TIMESTAMP;
