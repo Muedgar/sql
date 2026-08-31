@@ -108,3 +108,67 @@ CREATE TYPE task_status_enum AS ENUM (
     'DONE',
     'CANCELLED'
 );
+
+CREATE TABLE tasks (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    created_by UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status task_status_enum NOT NULL DEFAULT 'TODO',
+    due_date DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id);
+);
+
+CREATE TABLE task_assignees (
+    task_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY (task_id, user_id),
+    CONSTRAINT fk_task_assignees_task FOREIGN KEY (task_id) REFERENCES tasks(id);
+    CONSTRAINT fk_task_assignees_user FOREIGN KEY (user_id) REFERENCES users(id);
+);
+
+CREATE TABLE tasks_comments (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    task_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_task_comments_task FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE CASCADE,
+    CONSTRAINT fk_task_comments_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+CREATE TYPE transaction_type_enum AS ENUM (
+    'DEPOSIT',
+    'WITHDRAWAL',
+    'TRANSFER'
+);
+
+CREATE TABLE accounts (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    account_number VARCHAR(50) UNIQUE NOT NULL,
+    balance NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(id);
+);
+
+CREATE TABLE transactions (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    account_id UUID NOT NULL,
+    transaction_type transaction_type_enum NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_transactions_account FOREIGN KEY (account_id) REFERENCES accounts(id),
+    CONSTRAINT chk_transaction_amount_positive CHECK (amount > 0);
+);
