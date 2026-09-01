@@ -171,3 +171,37 @@ BEGIN
             performance_level = EXCLUDED.performance_level,
             bonus_amount = EXCLUDED.bonus_amount,
             calculated_at = CURRENT_TIMESTAMP;
+        
+        RAISE NOTICE
+            'Employee: %, sales: %, target: %, performance: %, bonus: %',
+            employee_record.name,
+            v_net_sales,
+            v_target_percentage,
+            v_performance_level,
+            v_final_bonus;
+    END LOOP;
+
+    -- RANK EMPLOYEES INSIDE EACH DEPARTMENT. DENSE_RANK GIVES EQUAL RANKS TO EMPLOYEES WITH EQUAL SALES.
+    WITH employee_ranking AS (
+        SELECT
+            eb.id AS bonus_id,
+            DENSE_RANK() OVER (
+                PARTITION BY e.department_id
+                ORDER BY eb.total_sales DESC
+            ) AS calculated_rank
+        FROM employee_bonuses eb
+        INNER JOIN employees e
+            ON e.id = eb.employee_id
+        WHERE eb.bonus_month = v_month_start
+    )
+    UPDATE employee_bonuses eb
+    SET department_rank = er.calculated_rank
+    FROM employee_ranking er
+    WHERE eb.id = er.bonus_id;
+
+    RAISE NOTICE 'Monthly bonus calculation completed.';
+END;
+$$;
+
+-- CALL THE PROCEDURE
+CALL calculate_monthly_bonuses('2026-08-01');
