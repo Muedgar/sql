@@ -159,3 +159,49 @@ CREATE TABLE account (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 );
+
+CREATE TABLE transactions (
+    pkid SERIAL PRIMARY KEY,
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    account_id UUID NOT NULL,
+    transaction_type transaction_type_enum NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_transactions_account FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    CONSTRAINT chk_transaction_amount_position CHECK (amount > 0);
+);
+
+ALTER TABLE accounts ADD CONSTRAINT chk_account_balance_not_negative CHECK (balance >= 0);
+ALTER TABLE transactions ADD CONSTRAINT chk_transaction_amount_not_zero CHECK (amount > 0);
+ALTER TABLE users ADD CONSTRAINT chk_email_format CHECK (email LIKE '%@%');
+
+CREATE TABLE blog_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE blog_posts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    author_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT blog_posts_author FOREIGN KEY (author_id) REFERENCES blog_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE blog_comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    post_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    CONSTRAINT fk_blog_comments_post FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_blog_comments_user FOREIGN KEY (user_id) REFERENCES blog_users(id) ON DELETE CASCADE
+);
