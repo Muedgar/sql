@@ -37,3 +37,62 @@ CREATE TABLE employee_bonuses (
     UNIQUE (employee_id, bonus_month)
 );
 
+INSERT INTO departments (name, department_multiplier)
+VALUES
+    ('Technology', 1.20),
+    ('Marketing', 1.10),
+    ('Retail', 1.00);
+
+INSERT INTO employees (
+    name,
+    department_id,
+    monthly_salary,
+    monthly_target
+)
+VALUES
+    ('Alice', 1, 1500000, 5000000),
+    ('Bob',   1, 1200000, 4000000),
+    ('Carol', 2, 1000000, 3000000),
+    ('David', 3,  800000, 2000000),
+    ('Eric',  3,  900000, 2500000);
+
+INSERT INTO sales (employee_id, sale_amount, returned, sale_date)
+VALUES
+    -- Alice
+    (1, 3000000, FALSE, '2026-08-03'),
+    (1, 2500000, FALSE, '2026-08-10'),
+    (1,  500000, TRUE,  '2026-08-15'),
+
+    -- Bob
+    (2, 2000000, FALSE, '2026-08-05'),
+    (2, 1500000, FALSE, '2026-08-18'),
+
+    -- Carol
+    (3, 3500000, FALSE, '2026-08-07'),
+    (3,  300000, TRUE,  '2026-08-20'),
+
+    -- David
+    (4, 1200000, FALSE, '2026-08-09'),
+    (4, 1000000, FALSE, '2026-08-21'),
+
+    -- Eric
+    (5, 1000000, FALSE, '2026-08-12');
+
+CREATE OR REPLACE PROCEDURE calculate_monthly_bonuses(
+    p_month DATE
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    employee_record RECORD;
+    v_month_start DATE;
+    v_month_end DATE;
+    v_successful_sales NUMERIC(12,2);
+    v_returned_amount NUMERIC(12,2);
+    v_net_sales NUMERIC(12,2);
+    v_target_percentage NUMERIC(8,2);
+    v_performance_level VARCHAR(30);
+    v_bonus_rate NUMERIC(5,4);
+    v_base_bonus NUMERIC(12,2);
+    v_return_penalty NUMERIC(12,2);
+    v_final_bonus NUMERIC(12,2);
