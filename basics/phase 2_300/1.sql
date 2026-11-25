@@ -28,4 +28,3 @@ SELECT email, COUNT(*) AS duplicate_count FROM users GROUP BY email HAVING COUNT
 
 -- REMOVE DUPLICATE EMAILS SAFELY, KEEPING THE OLDEST USER
 WITH ranked_users AS (SELECT id, email, ROW_NUMBER() OVER (PARTITION BY email ORDER BY created_at ASC) AS row_number FROM users) DELETE FROM users WHERE id IN (SELECT id FROM ranked_users WHERE row_number > 1);
-
